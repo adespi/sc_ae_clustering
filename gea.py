@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from gseapy.parser import Biomart
 from gseapy.plot import barplot, dotplot
 from gseapy.plot import gseaplot
+import os
 
 # load data
 group = np.load("results_brain/ae/y_pred.npy")
@@ -28,11 +29,13 @@ for x in pd.DataFrame.from_records(r).columns:
     # rank gene by importance for clusters
     glist = pd.DataFrame.from_records(r)[x].tolist()
     bm = Biomart()
+    if not os.path.exists("test"):
+        os.makedirs("test")
     results = bm.query(dataset='hsapiens_gene_ensembl',
                     attributes=['external_gene_name', 'go_id'],
                     filters={'hgnc_symbol': glist},
                     # save output file
-                    filename="query.results.txt")
+                    filename="test/query_"+x+".results.txt")
 
     enr = gp.enrichr(gene_list=glist,
                     description='test_name',
