@@ -130,7 +130,7 @@ if __name__ == "__main__":
     t0 = time()
     print('...Pretraining autoencoder...')
 
-    dims= [input_size, 256, 64, 8]
+    dims= [input_size, 256, 64, 32]
 
 
     model, encoder, imputation_no_zi_network, loss, counts_input, latent_layer = create_model(model = args.model, dims = dims)
@@ -151,7 +151,7 @@ if __name__ == "__main__":
     if not os.path.isdir(args.save_dir+"/"+args.model):
         os.mkdir(args.save_dir+"/"+args.model)
 
-    plot_model(model, to_file= args.save_dir+"/"+args.model+"/"+"scDeepCluster_model.png", show_shapes=True)
+    plot_model(model, to_file= args.save_dir+"/"+args.model+"/"+"scDeepCluster_model.pdf", show_shapes=True)
     model.save_weights(args.save_dir+"/"+args.model+"/"+args.model_weight_file)
     print('Pretrained weights are saved to ./' + str(args.save_dir+"/"+args.model+"/"+args.model_weight_file))
     imputed_expression = model.predict(x=[adata.X, adata.obs.size_factors]).astype(np.int)
@@ -211,7 +211,7 @@ if __name__ == "__main__":
         plt.scatter(X_embedded[:,0],X_embedded[:,1],c=y_pred,cmap='tab20', s=1)#; plt.show()
         plt.title("Colors represent cluster predictions")
         plt.suptitle("TSNE representation of each cell in the latent dimension of the {} model".format(args.model))
-        plt.savefig(args.save_dir+"/"+args.model+"/"+ "TSNE_kmeans.png")
+        plt.savefig(args.save_dir+"/"+args.model+"/"+ "TSNE_kmeans.pdf")
         #figure1.show()
     
         figure2=plt.figure(2)
@@ -225,7 +225,7 @@ if __name__ == "__main__":
         plt.title("Colors represent known cell types")
         plt.suptitle("TSNE representation of each cell in the latent dimension of the {} model".format(args.model))
         plt.legend(markerscale=8.)
-        plt.savefig(args.save_dir+"/"+args.model+"/"+"TSNE_cell_types.png")
+        plt.savefig(args.save_dir+"/"+args.model+"/"+"TSNE_cell_types.pdf")
         #figure2.show()
         
         print('Figures are saved to ./' + str(args.save_dir+"/"+args.model+"/"))
