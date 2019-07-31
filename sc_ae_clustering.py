@@ -79,22 +79,21 @@ if __name__ == "__main__":
     x = np.array(data_mat['X'])
     y = np.array(data_mat['Y'])"""
     if ".feather" in args.data_file:
-        x = pd.read_feather(args.data_file)#.iloc[:,[x for x in range(250) if x != 98]]
-        #gene_names = x.index[np.where(x.values.sum(axis=1)!=0)[0]]
+        x = pd.read_feather(args.data_file)
         genes_to_drop = np.where(x.values.sum(axis=1)==0)[0]
         gene_names = pd.read_csv("sc_data/gene_names.csv")['x']
         gene_names = gene_names.drop(genes_to_drop, 0)
         cell_names = x.columns
         x = x.values.T
-        y = pd.read_feather("sc_data/colAnnotations.feather").values[:,1]
+        y = pd.read_feather("sc_data/colAnnotations.feather").values[:,1] #previously known clustering else np.zeros(len(cell_names))
 
     elif ".tsv" in args.data_file:
         x=pd.read_csv(args.data_file, sep ='\t')
         gene_names = x.index[np.where(x.values.sum(axis=1)!=0)[0]]
         cell_names = x.columns
         x=x.values.T
-        y = np.zeros(x.shape[0])
-    #y=np.array(x.columns.str.split('.').tolist())[:,1].astype(np.float)
+        y = np.zeros(x.shape[0])  #previously known clustering else np.zeros(len(cell_names))
+        #y=np.array(x.columns.str.split('.').tolist())[:,1].astype(np.float)
 
 
     # preprocessing scRNA-seq read counts matrix
@@ -138,10 +137,10 @@ if __name__ == "__main__":
 
     model.compile(loss= loss, optimizer=optimizer)
     model.summary()
-    if args.weights == None:
+    if args.weights == None: # train model
         es = EarlyStopping(monitor="loss", patience=50, verbose=1)
         model.fit(x=[adata.X, adata.obs.size_factors], y=adata.raw.X, batch_size=args.batch_size, epochs=args.pretrain_epochs, callbacks=[es])
-    else:
+    else: # load model weights
         assert os.path.isfile(args.weights)
         model.load_weights(args.weights)
     
@@ -154,6 +153,9 @@ if __name__ == "__main__":
     plot_model(model, to_file= args.save_dir+"/"+args.model+"/"+"scDeepCluster_model.pdf", show_shapes=True)
     model.save_weights(args.save_dir+"/"+args.model+"/"+args.model_weight_file)
     print('Pretrained weights are saved to ./' + str(args.save_dir+"/"+args.model+"/"+args.model_weight_file))
+
+    # run model
+
     imputed_expression = model.predict(x=[adata.X, adata.obs.size_factors]).astype(np.int)
     imputed_expression_no_zi = imputation_no_zi_network.predict(x=[adata.X, adata.obs.size_factors]).astype(np.int)
     latent_d = encoder.predict(x=adata.X)
@@ -161,6 +163,8 @@ if __name__ == "__main__":
     y_pred = kmeans.fit_predict(latent_d)
     print("cell clustering finished")
     #np.save(args.save_dir+"/"+args.model+"/"+"latent_d",latent_d)
+
+    # save results
     pd.DataFrame(latent_d.T, columns = cell_names).to_csv(args.save_dir+"/"+args.model+"/"+"latent_d.csv")
     
     np.save(args.save_dir+"/"+args.model+"/"+"y_pred",y_pred)
@@ -204,7 +208,7 @@ if __name__ == "__main__":
     gene_names.to_csv(args.save_dir+"/"+args.model+"/"+"gene_names.csv", header = False)
     print('latent_d values and imputed_expression for each cell are saved to ./' + str(args.save_dir+"/"+args.model+"/"))
 
-
+    # plot T-SNE
     if args.plot_TNSE:
         X_embedded = TSNE(n_components=2, verbose=4, early_exaggeration=20, learning_rate=500).fit_transform(latent_d)
         figure1=plt.figure(1)
