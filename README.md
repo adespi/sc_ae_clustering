@@ -9,3 +9,5 @@ To run without plotting T-SNE : `--plot_TNSE False`
 To reuse existing model : `--weights results/ae/weights.h5`
 
 To see the score and determine K run : `score.py --latent_d_file results/ae/latent_d.csv`
+
+To do a GE analysis on the result run : `python gea.py`
