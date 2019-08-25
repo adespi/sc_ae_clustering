@@ -11,3 +11,6 @@ To reuse existing model : `--weights results/ae/weights.h5`
 To see the score and determine K run : `score.py --latent_d_file results/ae/latent_d.csv`
 
 To do a GE analysis on the result run : `python gea.py`
+
+List of needed python packages : tensorflow, keras, pydot 
+Other program to install after pydot : http://www.graphviz.org/
